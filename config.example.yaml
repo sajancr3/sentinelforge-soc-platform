@@ -1,0 +1,31 @@
+interface: enp0s1
+
+logs:
+  auth_log: /var/log/auth.log
+  suricata_log: /var/log/suricata/eve.json
+  output_file: logs/enriched_alerts.json
+  response_log: response/response_log.txt
+
+threat_intel:
+  abuseipdb_enabled: true
+  abuseipdb_api_key: "oombiko - translate to malayalam "
+  max_age_days: 90
+
+response:
+  auto_block: false
+  block_threshold: 85
+  allowlist:
+    - 127.0.0.1
+    - 192.168.64.6
+
+correlation:
+  window_seconds: 60
+
+deduplication:
+  window_seconds: 15
+
+lab:
+  known_lab_ips:
+    - 127.0.0.1
+    - 192.168.64.6
+    - 192.168.1.10

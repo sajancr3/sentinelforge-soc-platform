@@ -1,0 +1,13 @@
+venv/
+__pycache__/
+*.pyc
+
+logs/
+response/response_log.txt
+response/blocked_ips.txt
+
+*.log
+*.pcap
+*.zip
+
+config.yaml
