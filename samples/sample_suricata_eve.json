@@ -1,0 +1,14 @@
+{
+  "timestamp": "2026-04-28T18:20:10.000000+0000",
+  "event_type": "alert",
+  "src_ip": "192.168.64.4",
+  "src_port": 44444,
+  "dest_ip": "192.168.64.6",
+  "dest_port": 22,
+  "proto": "TCP",
+  "alert": {
+    "signature": "ET SCAN Nmap Scripting Engine User-Agent Detected",
+    "category": "Attempted Information Leak",
+    "severity": 2
+  }
+}
