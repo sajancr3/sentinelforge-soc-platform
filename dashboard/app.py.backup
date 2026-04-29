@@ -6,9 +6,6 @@ import time
 
 st.set_page_config(page_title="SentinelForge SOC", layout="wide")
 
-
-st.set_page_config(page_title="SentinelForge SOC", layout="wide")
-
 LOG_FILE = "logs/enriched_alerts.json"
 
 
@@ -146,102 +143,5 @@ else:
         use_container_width=True
     )
 
-
-# -------------------------------
-# Correlated Incident Reports
-# -------------------------------
-
-st.divider()
-st.header("🚨 Correlated Incident Reports")
-st.caption("Real-time multi-source incidents generated from auth.log + Suricata EVE correlation.")
-
-INCIDENT_DIR = "reports/incidents"
-
-def load_incidents():
-    incidents = []
-
-    if not os.path.exists(INCIDENT_DIR):
-        return incidents
-
-    files = sorted(
-        [os.path.join(INCIDENT_DIR, f) for f in os.listdir(INCIDENT_DIR) if f.endswith(".json")],
-        reverse=True
-    )
-
-    for file in files[:20]:
-        try:
-            with open(file, "r") as f:
-                incidents.append(json.load(f))
-        except Exception:
-            continue
-
-    return incidents
-
-incident_items = load_incidents()
-
-if not incident_items:
-    st.info("No correlated incidents yet. Run SentinelForge and trigger safe lab traffic from Parrot.")
-else:
-    total_incidents = len(incident_items)
-    critical_incidents = sum(
-        1 for item in incident_items
-        if item.get("incident", {}).get("risk") == "CRITICAL"
-    )
-    high_incidents = sum(
-        1 for item in incident_items
-        if item.get("incident", {}).get("risk") == "HIGH"
-    )
-
-    i1, i2, i3 = st.columns(3)
-    i1.metric("Total Incidents", total_incidents)
-    i2.metric("Critical Incidents", critical_incidents)
-    i3.metric("High Incidents", high_incidents)
-
-    for idx, item in enumerate(incident_items):
-        incident = item.get("incident", {})
-        report = item.get("report", "")
-
-        risk = incident.get("risk", "UNKNOWN")
-        ip = incident.get("ip", "unknown")
-        score = incident.get("risk_score", 0)
-        count = incident.get("event_count", 0)
-        reasons = incident.get("reasons", [])
-        mitre = incident.get("mitre", [])
-        events = incident.get("events", [])
-
-        with st.expander(f"{risk} Incident | {ip} | Score {score} | Events {count}", expanded=False):
-            c1, c2, c3 = st.columns(3)
-            c1.metric("Source IP", ip)
-            c2.metric("Risk Score", score)
-            c3.metric("Event Count", count)
-
-            st.subheader("Reasons")
-            if reasons:
-                for reason in reasons:
-                    st.write(f"- {reason}")
-            else:
-                st.write("No reasons recorded.")
-
-            st.subheader("MITRE Mapping")
-            if mitre:
-                for technique in mitre:
-                    st.write(f"- {technique}")
-            else:
-                st.write("No MITRE mapping recorded.")
-
-            st.subheader("Timeline Events")
-            if events:
-                st.dataframe(events, use_container_width=True)
-            else:
-                st.write("No event timeline available.")
-
-            st.subheader("Generated Incident Report")
-            st.code(report)
-
-            st.download_button(
-                label="Download Incident Report",
-                data=report,
-                file_name=f"sentinelforge_incident_{ip.replace(':','_').replace('.','_')}.txt",
-                mime="text/plain",
-                key=f"download_{idx}_{ip}_{score}_{count}"
-            )
+time.sleep(3)
+st.rerun()

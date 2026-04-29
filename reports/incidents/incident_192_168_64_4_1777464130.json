@@ -1,0 +1,52 @@
+{
+  "incident": {
+    "ip": "192.168.64.4",
+    "risk": "HIGH",
+    "risk_score": 60,
+    "event_count": 5,
+    "reasons": [
+      "SSH brute-force pattern detected"
+    ],
+    "mitre": [
+      "T1110 - Brute Force"
+    ],
+    "events": [
+      {
+        "source": "auth",
+        "event": "ssh_failed",
+        "ip": "192.168.64.4",
+        "timestamp": 1777464127.1837354,
+        "severity": "low"
+      },
+      {
+        "source": "auth",
+        "event": "ssh_failed",
+        "ip": "192.168.64.4",
+        "timestamp": 1777464127.1840122,
+        "severity": "low"
+      },
+      {
+        "source": "auth",
+        "event": "ssh_failed",
+        "ip": "192.168.64.4",
+        "timestamp": 1777464127.1840339,
+        "severity": "low"
+      },
+      {
+        "source": "auth",
+        "event": "ssh_failed",
+        "ip": "192.168.64.4",
+        "timestamp": 1777464127.1840496,
+        "severity": "low"
+      },
+      {
+        "source": "auth",
+        "event": "ssh_failed",
+        "ip": "192.168.64.4",
+        "timestamp": 1777464129.9967496,
+        "severity": "low"
+      }
+    ]
+  },
+  "report": "===== SENTINELFORGE INCIDENT REPORT =====\nIP: 192.168.64.4\nRisk: HIGH\nScore: 60\nReasons: SSH brute-force pattern detected\nMITRE: T1110 - Brute Force\n\n--- Timeline ---\n1777464127.1837354 | ssh_failed | auth\n1777464127.1840122 | ssh_failed | auth\n1777464127.1840339 | ssh_failed | auth\n1777464127.1840496 | ssh_failed | auth\n1777464129.9967496 | ssh_failed | auth\n\n--- Recommended Action ---\nInvestigate and monitor closely"
+}
