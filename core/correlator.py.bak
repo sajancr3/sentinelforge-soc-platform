@@ -30,38 +30,13 @@ def correlate():
             if e.get("event") == "ids_alert"
         ]
 
-        windows_failures = [
-            e for e in evts
-            if e.get("event") == "windows_failed_logon"
-        ]
-
-        process_events = [
-            e for e in evts
-            if e.get("event") == "process_creation"
-        ]
-
-        # Skip threat intel for internal lab IPs
-        if (
-            ip.startswith("192.168.")
-            or ip.startswith("10.")
-            or ip.startswith("172.")
-            or ip == "localhost"
-        ):
-            intel = {
-                "abuse_score": 0,
-                "country": "Internal",
-                "isp": "Internal Network",
-                "is_tor": False,
-                "total_reports": 0,
-                "known_malicious": False
-            }
-        else:
-            intel = enrich_ip(ip)
+        # Threat Intelligence Enrichment
+        intel = enrich_ip(ip)
 
         risk_score = 0
         reasons = []
 
-        # Linux SSH brute force
+        # SSH Brute Force Detection
         if len(auth_failures) >= 5:
 
             risk_score += 60
@@ -70,16 +45,7 @@ def correlate():
                 f"SSH brute-force pattern detected ({len(auth_failures)} failures)"
             )
 
-        # Windows brute force
-        if len(windows_failures) >= 5:
-
-            risk_score += 60
-
-            reasons.append(
-                f"Windows brute-force pattern detected ({len(windows_failures)} failed logons)"
-            )
-
-        # IDS alerts
+        # IDS Detection
         if len(ids_alerts) >= 1:
 
             risk_score += 40
@@ -88,39 +54,16 @@ def correlate():
                 f"Suricata IDS alert detected ({len(ids_alerts)} alerts)"
             )
 
-        # Suspicious process execution
-        if len(process_events) >= 1:
-
-            risk_score += 50
-
-            reasons.append(
-                f"Suspicious process execution detected ({len(process_events)} events)"
-            )
-
-        # Multi-source correlation
-        sources = 0
-
-        if auth_failures:
-            sources += 1
-
-        if ids_alerts:
-            sources += 1
-
-        if windows_failures:
-            sources += 1
-
-        if process_events:
-            sources += 1
-
-        if sources >= 2:
+        # Multi-Source Correlation
+        if auth_failures and ids_alerts:
 
             risk_score += 30
 
             reasons.append(
-                f"Multi-source correlation across {sources} telemetry sources"
+                "Multi-source correlation: auth failures + IDS alert"
             )
 
-        # Threat intelligence
+        # Threat Intelligence Correlation
         if intel.get("known_malicious"):
 
             risk_score += 30
@@ -137,33 +80,30 @@ def correlate():
                 "Traffic originated from TOR exit node"
             )
 
-        # Severity
+        # Risk Classification
         if risk_score >= 90:
+
             risk = "CRITICAL"
 
         elif risk_score >= 60:
+
             risk = "HIGH"
 
         elif risk_score >= 30:
+
             risk = "MEDIUM"
 
         else:
             continue
 
-        # MITRE mapping
+        # MITRE Mapping
         mitre_techniques = set()
 
         if auth_failures:
             mitre_techniques.add("T1110")
 
-        if windows_failures:
-            mitre_techniques.add("T1110")
-
         if ids_alerts:
             mitre_techniques.add("T1595")
-
-        if process_events:
-            mitre_techniques.add("T1059")
 
         incidents.append({
 
@@ -188,7 +128,7 @@ def correlate():
                 "known_malicious": intel.get("known_malicious", False)
             },
 
-            "events": evts[-20:]
+            "events": evts[-10:]
         })
 
     return incidents

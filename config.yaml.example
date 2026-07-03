@@ -1,0 +1,21 @@
+# SentinelForge Configuration
+# Copy this to config.yaml and fill in your API keys.
+# config.yaml is gitignored — never commit real keys.
+
+abuseipdb:
+  api_key: "YOUR_ABUSEIPDB_API_KEY_HERE"
+  # Get a free key at https://www.abuseipdb.com/api
+
+ollama:
+  url: "http://localhost:11434"
+  model: "llama3"           # any model you have pulled: llama3, mistral, phi3, etc.
+  # Install: curl https://ollama.ai/install.sh | sh
+  # Pull model: ollama pull llama3
+
+dashboard:
+  port: 5001
+  host: "0.0.0.0"
+
+monitor:
+  auth_log: "/var/log/auth.log"
+  auto_block_threshold: 10   # failures before iptables DROP

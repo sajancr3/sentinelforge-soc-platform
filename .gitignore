@@ -1,13 +1,43 @@
-venv/
-__pycache__/
-*.pyc
+# Database (contains real IPs and attack data)
+*.db
+*.db-shm
+*.db-wal
 
-logs/
-response/response_log.txt
-response/blocked_ips.txt
-
-*.log
-*.pcap
-*.zip
-
+# API keys and secrets
 config.yaml
+.env
+*.env
+
+# Sample data (large binary files)
+samples/*.json
+samples/*.csv
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.egg-info/
+dist/
+build/
+.eggs/
+*.egg
+venv/
+.venv/
+env/
+
+# Logs
+*.log
+logs/
+
+# Reports (auto-generated)
+reports/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo

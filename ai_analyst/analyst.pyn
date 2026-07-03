@@ -1,0 +1,16 @@
+def analyze_incident(incident):
+    alert_type = incident.get("type", "Unknown Alert")
+    source_ip = incident.get("source_ip", "Unknown IP")
+    severity = incident.get("severity", "Medium")
+
+    return {
+        "ai_summary": f"SentinelForge detected a {alert_type} involving source IP {source_ip}.",
+        "ai_severity_reason": f"The incident is marked as {severity} based on observed activity and detection rules.",
+        "mitre_mapping": ["T1110 - Brute Force"] if "ssh" in alert_type.lower() else ["T1046 - Network Service Discovery"],
+        "recommended_actions": [
+            "Review authentication logs",
+            "Check whether login attempts were successful",
+            "Block or monitor the source IP",
+            "Rotate affected credentials if compromise is suspected"
+        ]
+    }

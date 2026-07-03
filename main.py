@@ -3,6 +3,8 @@ import time
 
 from ingest.realtime_auth import watch_auth
 from ingest.realtime_suricata import watch_suricata
+from ingest.realtime_windows import watch_windows
+
 from core.correlator import correlate
 from core.report import generate_report
 from core.incident_store import save_incident
@@ -26,16 +28,31 @@ def run_suricata():
         print("[ERROR] /var/log/suricata/eve.json not found.")
 
 
+def run_windows():
+    try:
+        watch_windows()
+    except FileNotFoundError:
+        print("[ERROR] Windows event sample file not found.")
+
+
 def run_detection():
+
     seen = set()
 
     while True:
+
         incidents = correlate()
 
         for incident in incidents:
-            key = f"{incident['ip']}-{incident['risk_score']}-{incident['event_count']}"
+
+            key = (
+                f"{incident['ip']}-"
+                f"{incident['risk_score']}-"
+                f"{incident['event_count']}"
+            )
 
             if key not in seen:
+
                 seen.add(key)
 
                 print("\n🚨 SENTINELFORGE INCIDENT DETECTED")
@@ -48,7 +65,11 @@ def run_detection():
                 print("-" * 60)
 
                 report = generate_report(incident)
-                saved_path = save_incident(incident, report)
+
+                saved_path = save_incident(
+                    incident,
+                    report
+                )
 
                 print("\n📄 INCIDENT REPORT")
                 print(report)
@@ -59,21 +80,42 @@ def run_detection():
 
 
 if __name__ == "__main__":
+
     print("[SentinelForge] Starting real-time SOC pipeline...")
-    print("[SentinelForge] Sources: auth.log + Suricata EVE JSON")
+    print("[SentinelForge] Sources: auth.log + Suricata + Windows Events")
     print("[SentinelForge] Press CTRL+C to stop.")
 
     threads = [
-        threading.Thread(target=run_auth, daemon=True),
-        threading.Thread(target=run_suricata, daemon=True),
-        threading.Thread(target=run_detection, daemon=True),
+
+        threading.Thread(
+            target=run_auth,
+            daemon=True
+        ),
+
+        threading.Thread(
+            target=run_suricata,
+            daemon=True
+        ),
+
+        threading.Thread(
+            target=run_windows,
+            daemon=True
+        ),
+
+        threading.Thread(
+            target=run_detection,
+            daemon=True
+        )
     ]
 
     for thread in threads:
         thread.start()
 
     try:
+
         while True:
             time.sleep(1)
+
     except KeyboardInterrupt:
+
         print("\n[SentinelForge] Stopped.")
