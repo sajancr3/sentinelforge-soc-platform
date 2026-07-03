@@ -1,0 +1,69 @@
+version: '3.8'
+
+# SentinelForge — Docker Compose
+# ================================
+# Three services share the same SQLite DB via bind mount.
+#
+# Usage:
+#   cp .env.example .env        # add your AbuseIPDB key
+#   touch sentinelforge.db      # create empty DB file (auto-schema on first run)
+#   docker-compose up --build
+#
+# Dashboard: http://localhost:5001
+#
+# To run attacks from Parrot OS:
+#   hydra -l root -P rockyou.txt ssh://DEBIAN_IP -t 4
+#   nmap -sS -p 22,80,443 DEBIAN_IP
+
+services:
+
+  # ── Dashboard ──────────────────────────────────────────────────
+  dashboard:
+    build: .
+    container_name: sf_dashboard
+    command: python3 dashboard.py
+    ports:
+      - "5001:5001"
+    volumes:
+      - ./sentinelforge.db:/app/sentinelforge.db
+      - ./samples:/app/samples:ro
+    environment:
+      - ABUSEIPDB_KEY=${ABUSEIPDB_KEY:-}
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:5001/api/data')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ── CICIDS Streamer ────────────────────────────────────────────
+  # Replays CICIDS2017 dataset at 0.3s/event into the shared DB.
+  # Set STREAM_RATE to control speed (lower = faster).
+  streamer:
+    build: .
+    container_name: sf_streamer
+    command: python3 streamer.py ${STREAM_RATE:-0.3}
+    volumes:
+      - ./sentinelforge.db:/app/sentinelforge.db
+      - ./samples:/app/samples:ro
+    depends_on:
+      - dashboard
+    restart: "no"   # runs once through the dataset then exits
+
+  # ── Live Attack Monitor ────────────────────────────────────────
+  # Watches the HOST's /var/log/auth.log for real SSH attacks.
+  # Requires NET_ADMIN capability for iptables auto-block.
+  # Uses host network so iptables rules apply to the host stack.
+  monitor:
+    build: .
+    container_name: sf_monitor
+    command: python3 live_monitor.py
+    volumes:
+      - ./sentinelforge.db:/app/sentinelforge.db
+      - /var/log/auth.log:/var/log/auth.log:ro
+    environment:
+      - ABUSEIPDB_KEY=${ABUSEIPDB_KEY:-}
+    cap_add:
+      - NET_ADMIN       # required for iptables DROP
+    network_mode: host  # iptables rules apply to host network stack
+    restart: unless-stopped

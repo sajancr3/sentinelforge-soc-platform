@@ -1,0 +1,31 @@
+# Don't send these to the Docker build context
+
+# Database (bind-mounted at runtime)
+*.db
+*.db-shm
+*.db-wal
+
+# Secrets
+.env
+config.yaml
+
+# Large data files (bind-mounted at runtime)
+samples/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+
+# Git
+.git/
+.gitignore
+
+# Logs
+*.log
+logs/
+
+# OS
+.DS_Store
+Thumbs.db
